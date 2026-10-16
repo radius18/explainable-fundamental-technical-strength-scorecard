@@ -12,19 +12,19 @@ This project is a rule-based 0–100 decision-support scorecard that combines fi
 - Technical Trend — 0–20
 - Technical Momentum — 0–20
 
-The scorecard was designed to make the logic inspectable rather than reduce the result to an unexplained single number. It supports separate Value and Growth modes and exposes the category contributions directly in the chart label.
+The scorecard was designed to make its logic inspectable instead of reducing the result to an unexplained single number. It supports separate Value and Growth modes and exposes the category contributions directly in the chart label.
 
 ## Working Example
 
-![NVDA daily scorecard](Screenshot%202026-10-16%20020931.png)
+The current portfolio example uses **NVDA on a daily chart in Growth Mode**. The label shows the total score together with the individual category contributions so the result can be inspected rather than treated as a black-box signal.
 
-*Representative daily-chart view on NVDA showing the total score and visible category sub-scores in Growth Mode.*
+Selected screenshot: `Screenshot 2026-10-16 020931.png`
 
 ## Architecture and Scoring Logic
 
-![Scorecard architecture](Screenshot%202026-10-16%20021017.png)
+The scorecard separates five categories and keeps each category bounded to a maximum of 20 points. Value Mode uses price-to-book and price-to-sales thresholds, while Growth Mode uses gross profit margin as a quality-oriented proxy. Profitability, financial strength, trend, and momentum are scored independently before the total is capped at 100.
 
-*ThinkScript view documenting the five-category scorecard structure and the Value/Growth design.*
+Selected architecture screenshot: `Screenshot 2026-10-16 021017.png`
 
 ## QA Finding: Missing Data Could Change the Meaning of the Score
 
@@ -32,15 +32,22 @@ A later QA review found a semantic defect in the financial-strength logic. Unava
 
 The corrected implementation separates data availability from score arithmetic. Missing debt now receives zero debt points instead of being treated as zero leverage.
 
-![Corrected missing-data logic](Screenshot%202026-10-16%20023929.png)
+Corrected logic:
 
-*Corrected financial-strength logic: missing debt data is detected explicitly and cannot receive favorable low-debt points.*
+```thinkscript
+def debtScore =
+    if !hasDebt then 0
+    else if debtCap < 0.6 then 8
+    else 0;
+```
+
+Selected corrected-code screenshot: `Screenshot 2026-10-16 023929.png`
 
 ## Development and QA Lessons
 
 - Compile success is only a syntax gate; it does not prove semantic correctness.
 - Missing data is not just a completeness issue—it can change scoring behavior.
-- Defensive fallbacks can create hidden model-logic defects if they change the meaning of an input.
+- Defensive fallbacks can create hidden logic defects if they change the meaning of an input.
 - Composite scores benefit from explicit category bounds and visible sub-scores.
 - Runtime behavior, edge cases, and data availability need separate validation.
 - Uncertainty should be surfaced rather than silently converted into favorable values.
@@ -52,11 +59,11 @@ The scorecard supports two valuation approaches:
 - **Value Mode** uses price-to-book and price-to-sales thresholds.
 - **Growth Mode** uses gross profit margin as a quality-oriented proxy.
 
-If both modes are enabled, Growth Mode takes priority. For the NVDA example shown here, Growth Mode is the more appropriate configuration for the intended portfolio demonstration.
+If both modes are enabled, Growth Mode takes priority. For the NVDA portfolio example, Growth Mode is used.
 
 ## Timeframe Behavior
 
-The technical components use the active chart aggregation. As a result, technical trend and momentum can change when the chart timeframe changes. For example, RSI, moving averages, and the 10-bar momentum comparison are calculated from the current aggregation.
+The technical components use the active chart aggregation. As a result, technical trend and momentum can change when the chart timeframe changes. RSI, moving averages, and the 10-bar momentum comparison are calculated from the current aggregation.
 
 For this portfolio case, the **daily timeframe** is the preferred presentation because the score combines relatively slow-moving fundamental measures with technical trend and momentum context.
 
