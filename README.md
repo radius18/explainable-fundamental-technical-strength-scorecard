@@ -18,13 +18,21 @@ The scorecard was designed to make its logic inspectable instead of reducing the
 
 The current portfolio example uses **NVDA on a daily chart in Growth Mode**. The label shows the total score together with the individual category contributions so the result can be inspected rather than treated as a black-box signal.
 
-Selected screenshot: `Screenshot 2026-10-16 020931.png`
+![NVDA daily scorecard](Screenshot%202026-10-16%20023532.png)
+
+*Working daily-chart view showing the composite score and visible category contributions in Growth Mode.*
+
+## Configuration
+
+The scorecard supports separate Value and Growth modes. For this NVDA example, Growth Mode is enabled.
+
+![Scorecard configuration](Screenshot%202026-10-16%20023718.png)
+
+*Configuration view showing the portfolio example's Value/Growth settings and study controls.*
 
 ## Architecture and Scoring Logic
 
 The scorecard separates five categories and keeps each category bounded to a maximum of 20 points. Value Mode uses price-to-book and price-to-sales thresholds, while Growth Mode uses gross profit margin as a quality-oriented proxy. Profitability, financial strength, trend, and momentum are scored independently before the total is capped at 100.
-
-Selected architecture screenshot: `Screenshot 2026-10-16 021017.png`
 
 ## QA Finding: Missing Data Could Change the Meaning of the Score
 
@@ -41,7 +49,9 @@ def debtScore =
     else 0;
 ```
 
-Selected corrected-code screenshot: `Screenshot 2026-10-16 023929.png`
+![Corrected missing-data logic](Screenshot%202026-10-16%20023929.png)
+
+*Corrected financial-strength logic: missing debt data is detected explicitly and cannot receive favorable low-debt points.*
 
 ## Development and QA Lessons
 
